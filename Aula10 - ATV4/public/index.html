@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Livros e Autores</title>
+</head>
+<body>
+    <h1>Lista de Livros</h1>
+    <input type="text" id="livro-input" placeholder="Pesquisar por título">
+    <ul id="livros-lista"></ul>
+    <h1>Lista de Autores</h1>
+    <input type="text" id="autor-input" placeholder="Pesquisar por autor">
+    <ul id="autores-lista"></ul>
+
+    <script>
+        function fazerRequisicao(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var resposta = JSON.parse(xhr.responseText);
+                        callback(resposta);
+                    } else {
+                        console.error('Erro na requisição: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.open('GET', url, true);
+            xhr.send();
+        }
+
+        function renderizarLivros(livros) {
+            var listaLivros = document.getElementById('livros-lista');
+            listaLivros.innerHTML = '';
+            livros.forEach(function(livro) {
+                var item = document.createElement('li');
+                item.textContent = livro.titulo + ' - ' + livro.autor + ' (' + livro.ano + ')';
+                listaLivros.appendChild(item);
+            });
+        }
+
+        function renderizarAutores(autores) {
+            var listaAutores = document.getElementById('autores-lista');
+            listaAutores.innerHTML = '';
+            autores.forEach(function(autor) {
+                var item = document.createElement('li');
+                item.textContent = autor;
+                listaAutores.appendChild(item);
+            });
+        }
+
+        document.getElementById('livro-input').addEventListener('input', function() {
+            var titulo = this.value.trim();
+            fazerRequisicao('/livros?titulo=' + encodeURIComponent(titulo), renderizarLivros);
+        });
+
+        document.getElementById('autor-input').addEventListener('input', function() {
+            var autor = this.value.trim();
+            fazerRequisicao('/autores?autor=' + encodeURIComponent(autor), renderizarAutores);
+        });
+
+        fazerRequisicao('/livros', renderizarLivros);
+        fazerRequisicao('/autores', renderizarAutores);
+    </script>
+</body>
+</html>
